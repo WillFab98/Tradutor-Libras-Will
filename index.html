@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tradutor LIBRAS Mobile</title>
+  <title>Tradutor LIBRAS</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
     
     body { 
       background-color: #f8f9fa; 
-      color: #333; 
       display: flex; 
       flex-direction: column; 
-      justify-content: flex-end; /* Empurra os botões para a parte de BAIXO */
+      justify-content: flex-end; 
       align-items: center; 
       min-height: 100vh; 
       padding: 20px;
-      padding-top: 220px; /* Garante espaço para o avatar não cobrir os botões */
+      padding-top: 220px;
     }
     
     .container { 
@@ -24,147 +23,91 @@
       padding: 20px; 
       border-radius: 20px; 
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-      text-align: center; 
       width: 100%; 
       max-width: 400px;
-      margin-bottom: 10px;
     }
     
-    h1 { font-size: 1.2rem; margin-bottom: 15px; color: #1a73e8; }
+    .botoes-wrapper { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
     
-    .botoes-wrapper { display: flex; flex-direction: column; gap: 12px; }
-    
-    .btn-mic { 
-      background-color: #1a73e8; 
-      color: white; 
-      border: none; 
-      padding: 18px; 
-      font-size: 1.1rem; 
-      font-weight: bold; 
-      border-radius: 15px; 
-      cursor: pointer; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 10px;
-      width: 100%;
-    }
-    .btn-mic.gravando { background-color: #ea4335; }
-    
-    .btn-popup { 
-      background-color: #f1f3f4; 
-      color: #5f6368; 
-      border: none; 
-      padding: 12px; 
-      font-size: 0.9rem; 
-      border-radius: 15px; 
-      cursor: pointer;
-    }
+    input[type="text"] { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 15px; font-size: 1rem; }
 
-    .status-box { 
-      padding: 15px; 
-      background-color: #e8f0fe; 
-      border-radius: 15px; 
-      margin-top: 15px; 
-      min-height: 70px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-    }
+    .btn-traduzir { background-color: #34a853; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 15px; cursor: pointer; width: 100%; }
+    .btn-mic { background-color: #1a73e8; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 15px; cursor: pointer; width: 100%; }
+    .btn-popup { background-color: #f1f3f4; color: #5f6368; border: none; padding: 12px; font-size: 0.9rem; border-radius: 15px; cursor: pointer; width: 100%; }
+    
+    .status-box { padding: 15px; background-color: #e8f0fe; border-radius: 15px; margin-top: 15px; min-height: 60px; display: flex; align-items: center; justify-content: center; }
     .status-text { font-size: 1rem; color: #1a73e8; font-weight: 600; word-break: break-word; }
 
-    /* --- REGRAS PARA FIXAR O AVATAR DO VLIBRAS NO TOPO --- */
-    div[vw] {
-      position: fixed !important;
-      top: 10px !important;
-      bottom: auto !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      z-index: 9999 !important;
-    }
-    
-    .vw-plugin-wrapper {
-      top: 0 !important;
-      bottom: auto !important;
-    }
+    /* Fixa o avatar no topo */
+    div[vw] { position: fixed !important; top: 10px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 9999 !important; }
   </style>
 </head>
 <body>
 
-  <!-- Interface que fica na parte de BAIXO -->
   <div class="container">
-    <h1>Tradutor para LIBRAS</h1>
+    <input type="text" id="campoManual" placeholder="Digite algo para traduzir...">
     
     <div class="botoes-wrapper">
+      <button id="btnTraduzirManual" class="btn-traduzir">Traduzir Texto</button>
       <button id="btnFalar" class="btn-mic"><span>🎤</span> Falar agora</button>
-      <button id="btnPopup" class="btn-popup"><span>🔲</span> Modo Janela Flutuante</button>
+      <button id="btnPopup" class="btn-popup">🔲 Abrir em Janela Flutuante</button>
     </div>
 
     <div class="status-box">
-      <p id="texto" class="status-text">Toque no microfone para traduzir...</p>
+      <p id="texto" class="status-text">Aguardando...</p>
     </div>
   </div>
 
-  <!-- Avatar VLibras fixado no TOPO -->
   <div vw class="enabled">
     <div vw-access-button class="active"></div>
-    <div vw-plugin-wrapper>
-      <div class="vw-plugin-top-wrapper"></div>
-    </div>
+    <div vw-plugin-wrapper></div>
   </div>
 
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-    // Abre o avatar automaticamente
+    // 1. Abre o avatar sozinho
     window.addEventListener('load', () => {
       setTimeout(() => {
         const botaoMaozinha = document.querySelector('[vw-access-button]');
         if (botaoMaozinha) botaoMaozinha.click();
-      }, 1000);
+      }, 1500); // 1.5 segundos para garantir que carregou
       
+      // Esconde o botão de janela se já estiver em um popup
       if (window.name === 'JanelaLIBRAS' || window.opener) {
         document.getElementById('btnPopup').style.display = 'none';
       }
     });
 
+    // 2. Lógica do botão de janela flutuante
     document.getElementById('btnPopup').addEventListener('click', () => {
       window.open(window.location.href, 'JanelaLIBRAS', 'width=450,height=680,resizable=yes');
     });
 
-    const btnFalar = document.getElementById('btnFalar');
     const campoTexto = document.getElementById('texto');
+    const campoManual = document.getElementById('campoManual');
+
+    function atualizarTraducao(frase) {
+        campoTexto.innerText = frase;
+        setTimeout(() => {
+            const ev = new MouseEvent('click', { bubbles: true });
+            campoTexto.dispatchEvent(ev);
+        }, 300);
+    }
+
+    document.getElementById('btnTraduzirManual').addEventListener('click', () => {
+        if (campoManual.value.trim() !== "") atualizarTraducao(campoManual.value);
+    });
+
+    const btnFalar = document.getElementById('btnFalar');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'pt-BR';
-
-      btnFalar.addEventListener('click', () => {
-        try { recognition.start(); } catch (e) { recognition.stop(); }
-      });
-
-      recognition.onstart = () => {
-        btnFalar.classList.add('gravando');
-        btnFalar.innerHTML = '<span>🔴</span> Ouvindo...';
-        campoTexto.innerText = "Pode falar...";
-      };
-
-      recognition.onresult = (event) => {
-        const textoFalado = event.results[0][0].transcript;
-        campoTexto.innerText = textoFalado;
-
-        setTimeout(() => {
-          const ev = new MouseEvent('click', { bubbles: true });
-          campoTexto.dispatchEvent(ev);
-        }, 400);
-      };
-
-      recognition.onend = () => {
-        btnFalar.classList.remove('gravando');
-        btnFalar.innerHTML = '<span>🎤</span> Falar agora';
-      };
+      btnFalar.addEventListener('click', () => recognition.start());
+      recognition.onresult = (event) => atualizarTraducao(event.results[0][0].transcript);
     }
   </script>
 </body>
