@@ -74,7 +74,7 @@
       gap: 8px;
     }
     .btn-mic.gravando {
-      background-color: #ea4335;
+      background-color: #ea4335 !important;
     }
     .btn-popup { 
       background-color: #f1f3f4; 
@@ -190,43 +190,40 @@
       }
     });
 
-    // Reconhecimento de Voz com Solicitação Prévia de Áudio
+    // Reconhecimento de Voz Direto
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'pt-BR';
       recognition.continuous = false;
-      recognition.interimResults = false;
 
-      // Função para forçar ativação do microfone no Android
-      async function iniciarGravacao() {
-        try {
-          // Pede autorização direta de hardware
-          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            // Libera a stream para o SpeechRecognition usar
-            stream.getTracks().forEach(track => track.stop());
-          }
-        } catch (err) {
-          campoTexto.innerText = "Erro: Permissão de microfone negada.";
+      function resetarBotao() {
+        btnFalar.classList.remove('gravando');
+        btnFalar.innerHTML = '<span>🎤</span> Falar agora';
+      }
+
+      btnFalar.addEventListener('click', () => {
+        if (btnFalar.classList.contains('gravando')) {
+          try { recognition.stop(); } catch (e) {}
+          resetarBotao();
           return;
         }
 
         try {
           recognition.start();
         } catch (e) {
-          recognition.stop();
-          setTimeout(() => { try { recognition.start(); } catch (err) {} }, 200);
+          try { recognition.stop(); } catch (err) {}
+          setTimeout(() => {
+            try { recognition.start(); } catch (err2) {}
+          }, 150);
         }
-      }
-
-      btnFalar.addEventListener('click', iniciarGravacao);
+      });
 
       recognition.onstart = () => {
         btnFalar.classList.add('gravando');
         btnFalar.innerHTML = '<span>🔴</span> Ouvindo...';
-        campoTexto.innerText = "Fale agora...";
+        campoTexto.innerText = "Pode falar...";
       };
 
       recognition.onresult = (event) => {
@@ -235,19 +232,17 @@
       };
 
       recognition.onerror = (event) => {
-        console.log("Erro de áudio:", event.error);
-        campoTexto.innerText = "Não entendi ou microfone inativo. Tente novamente.";
+        console.log("Erro no microfone:", event.error);
         resetarBotao();
       };
 
       recognition.onend = () => {
         resetarBotao();
       };
-
-      function resetarBotao() {
-        btnFalar.classList.remove('gravando');
-        btnFalar.innerHTML = '<span>🎤</span> Falar agora';
-      }
+    } else {
+      btnFalar.innerHTML = '<span>⚠️</span> Sem suporte a áudio';
+      btnFalar.disabled = true;
+      btnFalar.style.opacity = '0.6';
     }
   </script>
 </body>
