@@ -2,140 +2,42 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tradutor LIBRAS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tradutor de Voz para LIBRAS</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
     
-    body { 
-      background-color: #f8f9fa; 
-      color: #333;
-      display: flex; 
-      flex-direction: column; 
-      justify-content: flex-end; 
-      align-items: center; 
-      min-height: 100vh; 
-      padding: 20px;
-      padding-top: 220px;
-    }
+    .container { background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); text-align: center; max-width: 480px; width: 100%; }
+    h1 { font-size: 1.4rem; margin-bottom: 20px; color: #1a73e8; }
     
-    .container { 
-      background: #ffffff; 
-      padding: 20px; 
-      border-radius: 20px; 
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-      width: 100%; 
-      max-width: 400px;
-    }
+    .botoes-wrapper { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .btn-mic { background-color: #1a73e8; color: white; border: none; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3); }
+    .btn-mic.gravando { background-color: #ea4335; }
     
-    input[type="text"] { 
-      width: 100%; 
-      padding: 15px; 
-      border: 2px solid #ddd; 
-      border-radius: 15px; 
-      font-size: 1rem;
-      outline: none;
-    }
-    input[type="text"]:focus {
-      border-color: #1a73e8;
-    }
+    .btn-popup { background-color: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; padding: 10px; font-size: 0.9rem; font-weight: 600; border-radius: 20px; cursor: pointer; }
 
-    .botoes-wrapper { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
-      margin-top: 12px; 
-    }
-
-    .btn-traduzir { 
-      background-color: #34a853; 
-      color: white; 
-      border: none; 
-      padding: 15px; 
-      font-size: 1rem;
-      font-weight: bold; 
-      border-radius: 15px; 
-      cursor: pointer; 
-      width: 100%; 
-    }
-    .btn-mic { 
-      background-color: #1a73e8; 
-      color: white; 
-      border: none; 
-      padding: 15px; 
-      font-size: 1rem;
-      font-weight: bold; 
-      border-radius: 15px; 
-      cursor: pointer; 
-      width: 100%; 
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-mic.gravando {
-      background-color: #ea4335;
-    }
-    .btn-popup { 
-      background-color: #f1f3f4; 
-      color: #5f6368; 
-      border: none; 
-      padding: 12px; 
-      font-size: 0.9rem; 
-      border-radius: 15px; 
-      cursor: pointer; 
-      width: 100%; 
-    }
-    
-    .status-box { 
-      padding: 15px; 
-      background-color: #e8f0fe; 
-      border-radius: 15px; 
-      margin-top: 15px; 
-      min-height: 65px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      text-align: center;
-    }
-    .status-text { 
-      font-size: 1rem; 
-      color: #1a73e8; 
-      font-weight: 600; 
-      word-break: break-word; 
-    }
-
-    /* Fixa o avatar VLibras centralizado no topo */
-    div[vw] { 
-      position: fixed !important; 
-      top: 10px !important; 
-      left: 50% !important; 
-      transform: translateX(-50%) !important; 
-      z-index: 9999 !important; 
-    }
-    .vw-plugin-wrapper {
-      top: 0 !important;
-      bottom: auto !important;
-    }
+    /* Caixa de Texto que sempre aparece */
+    .status-box { padding: 15px; background-color: #e8f0fe; border-radius: 8px; border: 1px solid #d2e3fc; min-height: 80px; display: flex; align-items: center; justify-content: center; margin-top: 15px; }
+    .status-text { font-size: 1.1rem; color: #1a73e8; font-weight: 600; word-break: break-word; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <input type="text" id="campoManual" placeholder="Digite algo para traduzir...">
+    <h1>Tradutor para LIBRAS</h1>
     
     <div class="botoes-wrapper">
-      <button id="btnTraduzirManual" class="btn-traduzir">Traduzir Texto</button>
-      <button id="btnFalar" class="btn-mic"><span>🎤</span> Falar agora</button>
-      <button id="btnPopup" class="btn-popup">🔲 Abrir em Janela Flutuante</button>
+      <button id="btnFalar" class="btn-mic"><span>🎤</span> Falar no Microfone</button>
+      <button id="btnPopup" class="btn-popup"><span>🔲</span> Abrir em Janela Flutuante</button>
     </div>
 
+    <!-- Caixa de texto de volta aqui -->
     <div class="status-box">
-      <p id="texto" class="status-text">Aguardando...</p>
+      <p id="texto" class="status-text">Clique no botão e comece a falar...</p>
     </div>
   </div>
 
-  <!-- Plugin VLibras -->
   <div vw class="enabled">
     <div vw-access-button class="active"></div>
     <div vw-plugin-wrapper>
@@ -147,107 +49,53 @@
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-    // 1. Abertura automática do avatar
     window.addEventListener('load', () => {
       setTimeout(() => {
         const botaoMaozinha = document.querySelector('[vw-access-button]');
         if (botaoMaozinha) botaoMaozinha.click();
-      }, 1500);
+      }, 1000);
       
       if (window.name === 'JanelaLIBRAS' || window.opener) {
         document.getElementById('btnPopup').style.display = 'none';
       }
     });
 
-    // 2. Janela Flutuante
     document.getElementById('btnPopup').addEventListener('click', () => {
       window.open(window.location.href, 'JanelaLIBRAS', 'width=450,height=680,resizable=yes');
     });
 
-    const campoTexto = document.getElementById('texto');
-    const campoManual = document.getElementById('campoManual');
     const btnFalar = document.getElementById('btnFalar');
-    const btnTraduzirManual = document.getElementById('btnTraduzirManual');
-
-    function atualizarTraducao(frase) {
-      campoTexto.innerText = frase;
-      setTimeout(() => {
-        const ev = new MouseEvent('click', { bubbles: true });
-        campoTexto.dispatchEvent(ev);
-      }, 400);
-    }
-
-    btnTraduzirManual.addEventListener('click', () => {
-      const textoDigitado = campoManual.value.trim();
-      if (textoDigitado !== "") {
-        atualizarTraducao(textoDigitado);
-      }
-    });
-
-    campoManual.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        btnTraduzirManual.click();
-      }
-    });
-
-    // Reconhecimento de Voz com Solicitação Prévia de Áudio
+    const campoTexto = document.getElementById('texto');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'pt-BR';
-      recognition.continuous = false;
-      recognition.interimResults = false;
 
-      // Função para forçar ativação do microfone no Android
-      async function iniciarGravacao() {
-        try {
-          // Pede autorização direta de hardware
-          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            // Libera a stream para o SpeechRecognition usar
-            stream.getTracks().forEach(track => track.stop());
-          }
-        } catch (err) {
-          campoTexto.innerText = "Erro: Permissão de microfone negada.";
-          return;
-        }
-
-        try {
-          recognition.start();
-        } catch (e) {
-          recognition.stop();
-          setTimeout(() => { try { recognition.start(); } catch (err) {} }, 200);
-        }
-      }
-
-      btnFalar.addEventListener('click', iniciarGravacao);
+      btnFalar.addEventListener('click', () => {
+        try { recognition.start(); } catch (e) { recognition.stop(); }
+      });
 
       recognition.onstart = () => {
         btnFalar.classList.add('gravando');
         btnFalar.innerHTML = '<span>🔴</span> Ouvindo...';
-        campoTexto.innerText = "Fale agora...";
+        campoTexto.innerText = "Pode falar...";
       };
 
       recognition.onresult = (event) => {
         const textoFalado = event.results[0][0].transcript;
-        atualizarTraducao(textoFalado);
-      };
+        campoTexto.innerText = textoFalado; // Exibe o texto aqui
 
-      recognition.onerror = (event) => {
-        console.log("Erro de áudio:", event.error);
-        campoTexto.innerText = "Não entendi ou microfone inativo. Tente novamente.";
-        resetarBotao();
+        setTimeout(() => {
+          const ev = new MouseEvent('click', { bubbles: true });
+          campoTexto.dispatchEvent(ev);
+        }, 400);
       };
 
       recognition.onend = () => {
-        resetarBotao();
-      };
-
-      function resetarBotao() {
         btnFalar.classList.remove('gravando');
-        btnFalar.innerHTML = '<span>🎤</span> Falar agora';
-      }
+        btnFalar.innerHTML = '<span>🎤</span> Falar no Microfone';
+      };
     }
   </script>
 </body>
