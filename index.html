@@ -16,7 +16,7 @@
       align-items: center; 
       min-height: 100vh; 
       padding: 20px;
-      padding-top: 220px; /* Espaço no topo para não cobrir o avatar */
+      padding-top: 220px;
     }
     
     .container { 
@@ -147,11 +147,7 @@
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-    // Variáveis de estado do microfone
-    let recognition = null;
-    let isListening = false;
-
-    // 1. Abertura automática do avatar ao carregar a página
+    // 1. Abertura automática do avatar
     window.addEventListener('load', () => {
       setTimeout(() => {
         const botaoMaozinha = document.querySelector('[vw-access-button]');
@@ -163,18 +159,16 @@
       }
     });
 
-    // 2. Abertura em Janela Flutuante
+    // 2. Janela Flutuante
     document.getElementById('btnPopup').addEventListener('click', () => {
       window.open(window.location.href, 'JanelaLIBRAS', 'width=450,height=680,resizable=yes');
     });
 
-    // Elementos do DOM
     const campoTexto = document.getElementById('texto');
     const campoManual = document.getElementById('campoManual');
     const btnFalar = document.getElementById('btnFalar');
     const btnTraduzirManual = document.getElementById('btnTraduzirManual');
 
-    // Função central para enviar o texto ao VLibras
     function atualizarTraducao(frase) {
       campoTexto.innerText = frase;
       setTimeout(() => {
@@ -183,7 +177,6 @@
       }, 400);
     }
 
-    // Ação: Traduzir Texto digitado
     btnTraduzirManual.addEventListener('click', () => {
       const textoDigitado = campoManual.value.trim();
       if (textoDigitado !== "") {
@@ -191,40 +184,32 @@
       }
     });
 
-    // Ação: Pressionar 'Enter' no campo de texto
     campoManual.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         btnTraduzirManual.click();
       }
     });
 
-    // Configuração e tratamento seguro do Reconhecimento de Voz
+    // Reconhecimento de Voz sem travas
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
+      const recognition = new SpeechRecognition();
       recognition.lang = 'pt-BR';
-      recognition.continuous = false;
-      recognition.interimResults = false;
 
       btnFalar.addEventListener('click', () => {
-        if (isListening) {
-          try {
-            recognition.stop();
-          } catch (e) {
-            console.log("Erro ao parar:", e);
-          }
-        } else {
-          try {
-            recognition.start();
-          } catch (e) {
-            console.log("Erro ao iniciar:", e);
-          }
+        try {
+          recognition.start();
+        } catch (e) {
+          // Se já estiver ouvindo ou der erro, para e reinicia imediatamente
+          recognition.stop();
+          setTimeout(() => {
+            try { recognition.start(); } catch (err) {}
+          }, 150);
         }
       });
 
       recognition.onstart = () => {
-        isListening = true;
         btnFalar.classList.add('gravando');
         btnFalar.innerHTML = '<span>🔴</span> Ouvindo...';
         campoTexto.innerText = "Pode falar...";
@@ -235,22 +220,15 @@
         atualizarTraducao(textoFalado);
       };
 
-      recognition.onerror = (event) => {
-        console.log("Erro no microfone:", event.error);
-        isListening = false;
+      recognition.onerror = () => {
         btnFalar.classList.remove('gravando');
         btnFalar.innerHTML = '<span>🎤</span> Falar agora';
       };
 
       recognition.onend = () => {
-        isListening = false;
         btnFalar.classList.remove('gravando');
         btnFalar.innerHTML = '<span>🎤</span> Falar agora';
       };
-    } else {
-      btnFalar.innerHTML = '<span>⚠️</span> Sem suporte a áudio';
-      btnFalar.disabled = true;
-      btnFalar.style.opacity = '0.6';
     }
   </script>
 </body>
